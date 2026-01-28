@@ -14,9 +14,9 @@ A dual-interface Apparel MES designed to streamline factory operations, bridging
 - **Backend:** PHP (Native).
 - **Database:** MySQL.
 
-## 💻 How to Run
+ ## 💻 How to Run
 1. Download the repository.
 2. Move the folder to `xampp/htdocs`.
 3. Import `flowtrack_mes.sql` into phpMyAdmin.
-4. Configure database connection in `layout_top.php` (if applicable).
-5. Open `http://localhost/flowtrack_mes` in your browser.
+4. Open `http://localhost/FlowTrack-MES` in your browser.
+   
