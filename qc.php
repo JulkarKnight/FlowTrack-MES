@@ -37,8 +37,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit_qc'])) {
         $today = date("Y-m-d");
         
         // Use Prepared Statement
-        $stmt = $conn->prepare("INSERT INTO Finished_Goods (Batch_ID, Quantity, Grade, Completed_Date) VALUES (?, ?, ?, ?)");
-        $stmt->bind_param("iiss", $bid, $passed, $grade, $today);
+      
+$stmt = $conn->prepare("INSERT INTO Finished_Goods (Batch_ID, Quantity, Grade, Completed_Date) 
+                        VALUES (?, ?, ?, ?) 
+                        ON DUPLICATE KEY UPDATE 
+                        Quantity = VALUES(Quantity), 
+                        Grade = VALUES(Grade), 
+                        Completed_Date = VALUES(Completed_Date)");
+
+$stmt->bind_param("iiss", $bid, $passed, $grade, $today);
         
         if ($stmt->execute()) {
             // Update Batch Status

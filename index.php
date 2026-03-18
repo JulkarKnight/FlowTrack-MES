@@ -79,7 +79,7 @@ for ($i = 6; $i >= 0; $i--) {
         box-shadow: 0 8px 16px rgba(0,0,0,0.15);
     }
 
-    /* ACTION BUTTONS */
+    /* STANDARD ACTION BUTTONS */
     .action-btn {
         display: flex; align-items: center; padding: 15px;
         border-radius: 18px; background: white; text-decoration: none;
@@ -91,6 +91,34 @@ for ($i = 6; $i >= 0; $i--) {
         display: flex; align-items: center; justify-content: center;
         color: white; margin-right: 15px; font-size: 18px;
     }
+
+    /* === THE GLORIFIED MAGIC BUTTON === */
+    .magic-card {
+        background: linear-gradient(135deg, #8E2DE2 0%, #4A00E0 100%); /* Deep Purple Gradient */
+        color: white;
+        padding: 25px;
+        border-radius: 22px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        text-decoration: none;
+        box-shadow: 0 10px 30px rgba(74, 0, 224, 0.3); /* Purple Glow Shadow */
+        position: relative;
+        overflow: hidden;
+        transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        border: 1px solid rgba(255,255,255,0.2);
+    }
+    .magic-card:hover { 
+        transform: translateY(-4px) scale(1.02); 
+        box-shadow: 0 20px 50px rgba(74, 0, 224, 0.5); 
+    }
+    /* Shine Effect */
+    .magic-card::after {
+        content: ''; position: absolute; top: 0; left: -100%; width: 50%; height: 100%;
+        background: linear-gradient(to right, transparent, rgba(255,255,255,0.2), transparent);
+        transform: skewX(-25deg); transition: 0.5s;
+    }
+    .magic-card:hover::after { left: 150%; transition: 0.7s ease-in-out; }
 
     /* PULSE DOT */
     @keyframes pulse-ring {
@@ -170,33 +198,45 @@ for ($i = 6; $i >= 0; $i--) {
         </div>
     </div>
 
-    <div class="d-card" style="display:flex; flex-direction:column; justify-content:center; gap:15px; cursor: default;">
-        <h3 style="margin:0 0 10px 0; font-size:18px;">Quick Actions</h3>
+    <div style="display:flex; flex-direction:column; gap:25px;">
         
-        <a href="batches.php" class="action-btn">
-            <div class="ab-icon" style="background: #007AFF;"><i class="fas fa-plus"></i></div>
+        <a href="forecasting.php" class="magic-card">
             <div>
-                <div style="font-weight:700; font-size:14px;">New Batch</div>
-                <div style="font-size:11px; color:#8E8E93;">Start Production</div>
+                <div style="font-size:11px; text-transform:uppercase; letter-spacing:1px; opacity:0.8; margin-bottom:5px;">New Feature</div>
+                <div style="font-size:18px; font-weight:700;">AI Forecast</div>
+                <div style="font-size:12px; opacity:0.9; margin-top:2px;">Predict Next Season &rarr;</div>
             </div>
+            <div style="font-size:32px; opacity:0.9;"><i class="fas fa-wand-magic-sparkles"></i></div>
         </a>
+        <div class="d-card" style="display:flex; flex-direction:column; justify-content:center; gap:15px; cursor: default; flex-grow:1;">
+            <h3 style="margin:0 0 5px 0; font-size:16px; color:#86868B;">Quick Actions</h3>
+            
+            <a href="batches.php" class="action-btn">
+                <div class="ab-icon" style="background: #007AFF;"><i class="fas fa-plus"></i></div>
+                <div>
+                    <div style="font-weight:700; font-size:14px;">New Batch</div>
+                    <div style="font-size:11px; color:#8E8E93;">Start Production</div>
+                </div>
+            </a>
 
-        <a href="inventory.php" class="action-btn">
-            <div class="ab-icon" style="background: #34C759;"><i class="fas fa-box-open"></i></div>
-            <div>
-                <div style="font-weight:700; font-size:14px;">Restock</div>
-                <div style="font-size:11px; color:#8E8E93;">Add Materials</div>
-            </div>
-        </a>
+            <a href="inventory.php" class="action-btn">
+                <div class="ab-icon" style="background: #34C759;"><i class="fas fa-box-open"></i></div>
+                <div>
+                    <div style="font-weight:700; font-size:14px;">Restock</div>
+                    <div style="font-size:11px; color:#8E8E93;">Add Materials</div>
+                </div>
+            </a>
 
-        <a href="qc.php" class="action-btn">
-            <div class="ab-icon" style="background: #FF9500;"><i class="fas fa-microscope"></i></div>
-            <div>
-                <div style="font-weight:700; font-size:14px;">QC Check</div>
-                <div style="font-size:11px; color:#8E8E93;">Inspect Goods</div>
-            </div>
-        </a>
+            <a href="qc.php" class="action-btn">
+                <div class="ab-icon" style="background: #FF9500;"><i class="fas fa-microscope"></i></div>
+                <div>
+                    <div style="font-weight:700; font-size:14px;">QC Check</div>
+                    <div style="font-size:11px; color:#8E8E93;">Inspect Goods</div>
+                </div>
+            </a>
+        </div>
     </div>
+
 </div>
 
 <div class="d-card pop-in delay-3" style="cursor: default;">

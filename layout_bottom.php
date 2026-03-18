@@ -56,18 +56,18 @@
         /* Icon & Text */
         .modal-icon {
             font-size: 32px;
-            color: var(--warning-orange);
+            color: var(--warning-orange); /* Assumes CSS variables from top layout */
             margin-bottom: 15px;
         }
-        .modal-box h3 { margin: 0 0 10px 0; color: var(--text-primary); }
-        .modal-box p { margin: 0 0 25px 0; color: var(--text-secondary); font-size: 14px; }
+        .modal-box h3 { margin: 0 0 10px 0; color: #1D1D1F; }
+        .modal-box p { margin: 0 0 25px 0; color: #86868B; font-size: 14px; }
 
         /* Buttons */
         .modal-actions { display: flex; gap: 10px; justify-content: center; }
         
         .btn-cancel {
             background: rgba(0,0,0,0.05);
-            color: var(--text-primary);
+            color: #1D1D1F;
             border: none;
             padding: 12px 20px;
             border-radius: 12px;
@@ -75,7 +75,7 @@
             font-weight: 600;
         }
         .btn-confirm {
-            background: var(--danger-red);
+            background: #FF3B30; /* Danger Red */
             color: white;
             border: none;
             padding: 12px 20px;
@@ -87,9 +87,11 @@
     </style>
 
     <script>
+        // ==========================================
+        // 1. GLASS MODAL LOGIC (Existing)
+        // ==========================================
         let pendingForm = null;
 
-        // 1. Entry Animations for Cards
         document.addEventListener("DOMContentLoaded", function() {
             const cards = document.querySelectorAll('.card');
             cards.forEach((card, index) => {
@@ -97,32 +99,77 @@
             });
         });
 
-        // 2. Global Function to Open Modal
         function confirmAction(event, message, isDanger = true) {
-            event.preventDefault(); // Stop the form immediately
-            
-            pendingForm = event.target.closest('form'); // Remember which form was clicked
-            
-            // Update UI text
+            event.preventDefault(); 
+            pendingForm = event.target.closest('form'); 
             document.getElementById('modal-desc').innerText = message;
-            
-            // Show Modal
             document.getElementById('glass-modal').classList.add('active');
         }
 
-        // 3. Handle "Yes" Click
         document.getElementById('btn-confirm').addEventListener('click', function() {
-            if(pendingForm) {
-                pendingForm.submit(); // Actually submit the form now
-            }
+            if(pendingForm) { pendingForm.submit(); }
             closeModal();
         });
 
-        // 4. Close Modal
         function closeModal() {
             document.getElementById('glass-modal').classList.remove('active');
             pendingForm = null;
         }
+
+
+        // ==========================================
+        // 2. GLOBAL EVENT-DRIVEN NOTIFICATIONS (New)
+        // ==========================================
+        let globalLastNotifId = 0;
+        
+        function globalPollNotifications() {
+            fetch('check_notifications.php')
+            .then(response => {
+                // If the user isn't logged in or the file is missing, exit quietly
+                if (!response.ok) throw new Error("API not reachable");
+                return response.json();
+            })
+            .then(data => {
+                // Safely update badge if it exists in the top navbar
+                const badge = document.getElementById('notif-badge');
+                if (badge) {
+                    if (data.unread_count > 0) {
+                        badge.style.display = 'flex';
+                        badge.innerText = data.unread_count;
+                    } else {
+                        badge.style.display = 'none';
+                    }
+                }
+                
+                // Pop a Toast if there's a new, unread notification
+                if (data.latest && data.latest.Notif_ID > globalLastNotifId) {
+                    globalLastNotifId = data.latest.Notif_ID;
+                    
+                    let toastIcon = 'info';
+                    if (data.latest.Type === 'Warning' || data.latest.Type === 'Conflict') toastIcon = 'error';
+                    if (data.latest.Type === 'Deadline') toastIcon = 'warning';
+                    if (data.latest.Type === 'Assignment') toastIcon = 'success';
+
+                    // Ensure SweetAlert2 is loaded before trying to fire it
+                    if (typeof Swal !== 'undefined') {
+                        Swal.fire({
+                            toast: true,
+                            position: 'top-end',
+                            icon: toastIcon,
+                            title: data.latest.Message,
+                            showConfirmButton: false,
+                            timer: 5000,
+                            timerProgressBar: true
+                        });
+                    }
+                }
+            })
+            .catch(err => { /* Silent fail to avoid polluting the console */ });
+        }
+
+        // Check for new notifications immediately, then every 30 seconds
+        setTimeout(globalPollNotifications, 1000); // 1-second delay lets the UI load first
+        setInterval(globalPollNotifications, 30000);
     </script>
 
 </body>

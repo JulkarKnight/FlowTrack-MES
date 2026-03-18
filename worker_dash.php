@@ -73,7 +73,7 @@ if (!$worker) {
     exit;
 }
 
-// 5. FETCH HISTORY (Using Perf_ID and Joining correctly)
+// 5. FETCH HISTORY
 $history_q = "SELECT wp.*, b.Product_Type 
               FROM Worker_Performance wp 
               JOIN Batch b ON wp.Batch_ID = b.Batch_ID 
@@ -102,8 +102,10 @@ $status_txt = ($worker['Availability'] == 'Available') ? '#065F46' : (($worker['
     <title>My Dashboard - FlowTrack</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js'></script>
+    
     <style>
-        :root { --bg: #F5F5F7; --card: #FFFFFF; --text: #1D1D1F; --blue: #007AFF; --green: #34C759; }
+        :root { --bg: #F5F5F7; --card: #FFFFFF; --text: #1D1D1F; --blue: #007AFF; --green: #34C759; --red: #FF3B30; }
         body { background: url('https://4kwallpapers.com/images/wallpapers/macos-monterey-stock-light-layers-5k-6016x6016-5898.jpg') no-repeat center center fixed; background-size: cover; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", sans-serif; margin: 0; padding: 20px; color: var(--text); }
         .container { max-width: 1000px; margin: 0 auto; backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); padding-bottom: 50px; }
         
@@ -111,6 +113,14 @@ $status_txt = ($worker['Availability'] == 'Available') ? '#065F46' : (($worker['
         .header { background: rgba(255, 255, 255, 0.85); padding: 15px 25px; border-radius: 18px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; border: 1px solid rgba(255,255,255,0.4); }
         .h-title { font-size: 22px; font-weight: 700; color: #1D1D1F; }
         .h-sub { color: #86868B; font-size: 13px; font-weight: 500; }
+        
+        .header-actions { display: flex; align-items: center; gap: 20px; }
+        
+        /* NOTIFICATION BELL */
+        .notif-bell { position: relative; cursor: pointer; color: #1D1D1F; font-size: 20px; transition: 0.2s; }
+        .notif-bell:hover { color: var(--blue); transform: scale(1.1); }
+        .notif-badge { position: absolute; top: -5px; right: -8px; background: var(--red); color: white; font-size: 10px; font-weight: bold; width: 16px; height: 16px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid white; display: none; }
+
         .status-form select { appearance: none; -webkit-appearance: none; padding: 8px 30px 8px 15px; border-radius: 20px; font-size: 13px; font-weight: 600; border: none; cursor: pointer; background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23000000%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E"); background-repeat: no-repeat; background-position: right 10px center; background-size: 10px; transition: all 0.2s; }
         .status-form select:focus { outline: none; box-shadow: 0 0 0 3px rgba(0,122,255,0.3); }
         .grid { display: grid; grid-template-columns: 350px 1fr; gap: 25px; margin-bottom: 25px; }
@@ -135,13 +145,7 @@ $status_txt = ($worker['Availability'] == 'Available') ? '#065F46' : (($worker['
 
         /* === NEW ACTIVITY HUB STYLES === */
         .hub-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; }
-        .hub-card {
-            background: rgba(255, 255, 255, 0.9);
-            border-radius: 20px;
-            padding: 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
-            border: 1px solid rgba(255,255,255,0.6);
-        }
+        .hub-card { background: rgba(255, 255, 255, 0.9); border-radius: 20px; padding: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); border: 1px solid rgba(255,255,255,0.6); }
         .hub-title { font-size: 16px; font-weight: 700; color: #1D1D1F; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; }
         
         /* MAC TABLE STYLE */
@@ -168,6 +172,15 @@ $status_txt = ($worker['Availability'] == 'Available') ? '#065F46' : (($worker['
         .mac-btn-save { background: #007AFF !important; border-radius: 8px !important; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
         .mac-btn-cancel { background: #E5E5EA !important; color: #000 !important; border-radius: 8px !important; }
         .mac-popup-radius { border-radius: 18px !important; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25) !important; }
+
+        /* CALENDAR STYLE */
+        .fc { font-size: 13px; }
+        .fc-toolbar-title { font-size: 16px !important; font-weight: 700; color: #1D1D1F; }
+        .fc-button { background: #007AFF !important; border: none !important; font-size: 12px !important; font-weight: 600 !important; border-radius: 8px !important; padding: 6px 12px !important; }
+        .fc-button-active { background: #005bb5 !important; }
+        .fc-daygrid-day-number { color: #1D1D1F; font-weight: 600; }
+        .fc-col-header-cell-cushion { color: #86868B; text-transform: uppercase; font-size: 11px; }
+        .fc-event { border-radius: 6px; border: none; font-size: 11px; font-weight: 600; padding: 2px 4px; }
     </style>
 </head>
 <body>
@@ -183,14 +196,21 @@ $status_txt = ($worker['Availability'] == 'Available') ? '#065F46' : (($worker['
             </div>
         </div>
         
-        <form method="post" class="status-form">
-            <input type="hidden" name="action" value="update_status">
-            <select name="status" onchange="this.form.submit()" style="background-color: <?php echo $status_bg; ?>; color: <?php echo $status_txt; ?>;">
-                <option value="Available" <?php if($worker['Availability']=='Available') echo 'selected'; ?>>● Available</option>
-                <option value="Sick" <?php if($worker['Availability']=='Sick') echo 'selected'; ?>>● Sick</option>
-                <option value="On Leave" <?php if($worker['Availability']=='On Leave') echo 'selected'; ?>>● On Leave</option>
-            </select>
-        </form>
+        <div class="header-actions">
+            <div class="notif-bell" onclick="showNotifications()">
+                <i class="fas fa-bell"></i>
+                <span id="notif-badge" class="notif-badge">0</span>
+            </div>
+
+            <form method="post" class="status-form">
+                <input type="hidden" name="action" value="update_status">
+                <select name="status" onchange="this.form.submit()" style="background-color: <?php echo $status_bg; ?>; color: <?php echo $status_txt; ?>;">
+                    <option value="Available" <?php if($worker['Availability']=='Available') echo 'selected'; ?>>● Available</option>
+                    <option value="Sick" <?php if($worker['Availability']=='Sick') echo 'selected'; ?>>● Sick</option>
+                    <option value="On Leave" <?php if($worker['Availability']=='On Leave') echo 'selected'; ?>>● On Leave</option>
+                </select>
+            </form>
+        </div>
     </div>
 
     <div class="grid">
@@ -260,8 +280,12 @@ $status_txt = ($worker['Availability'] == 'Available') ? '#065F46' : (($worker['
         </div>
     </div>
 
+    <div class="hub-card" style="margin-bottom: 25px;">
+        <div class="hub-title"><i class="fas fa-calendar-alt" style="color:#FF9F0A;"></i> My Schedule</div>
+        <div id="calendar"></div>
+    </div>
+
     <div class="hub-grid">
-        
         <div class="hub-card">
             <div class="hub-title"><i class="fas fa-history" style="color:#007AFF;"></i> Production History</div>
             
@@ -311,7 +335,6 @@ $status_txt = ($worker['Availability'] == 'Available') ? '#065F46' : (($worker['
                 <div class="empty-state">No defects reported recently. Great job!</div>
             <?php endif; ?>
         </div>
-
     </div>
 
 </div>
@@ -319,6 +342,116 @@ $status_txt = ($worker['Availability'] == 'Available') ? '#065F46' : (($worker['
 <script>
     <?php echo $msg_script; ?>
     const w = <?php echo $worker_json; ?>;
+
+    // --- NEW: LIVE NOTIFICATION POLLING ---
+    let lastNotifId = 0;
+    let currentNotifs = []; // Store the alerts globally so the modal can read them
+    
+    function pollNotifications() {
+        fetch('check_notifications.php')
+        .then(response => response.json())
+        .then(data => {
+            const badge = document.getElementById('notif-badge');
+            currentNotifs = data.all_unread || []; // Grab the full array of alerts
+            
+            if (data.unread_count > 0) {
+                badge.style.display = 'flex';
+                badge.innerText = data.unread_count;
+                
+                // If there's a new notification we haven't seen yet, trigger Toast
+                if (data.latest && data.latest.Notif_ID > lastNotifId) {
+                    lastNotifId = data.latest.Notif_ID;
+                    
+                    let toastIcon = 'info';
+                    if (data.latest.Type === 'Warning' || data.latest.Type === 'Conflict') toastIcon = 'error';
+                    if (data.latest.Type === 'Deadline') toastIcon = 'warning';
+                    if (data.latest.Type === 'Assignment') toastIcon = 'success';
+
+                    Swal.fire({
+                        toast: true,
+                        position: 'top-end',
+                        icon: toastIcon,
+                        title: data.latest.Message,
+                        showConfirmButton: false,
+                        timer: 5000,
+                        timerProgressBar: true
+                    });
+                    
+                    // Refresh calendar automatically if assigned a new task
+                    if (data.latest.Type === 'Assignment' && typeof calendarInstance !== 'undefined') {
+                        calendarInstance.refetchEvents();
+                    }
+                }
+            } else {
+                badge.style.display = 'none';
+            }
+        }).catch(err => console.error("Notification Polling Error", err));
+    }
+
+    // Check immediately, then every 10 seconds
+    pollNotifications();
+    setInterval(pollNotifications, 10000); 
+
+    function showNotifications() {
+        if (currentNotifs.length === 0) {
+            Swal.fire({ title: 'Notifications', text: 'You have no new alerts.', icon: 'info' });
+            return;
+        }
+
+        // Build HTML list of messages
+        let listHtml = '<div style="text-align:left; max-height: 250px; overflow-y:auto; padding-right:10px;">';
+        currentNotifs.forEach(n => {
+            // Pick a color based on type
+            let color = '#007AFF';
+            if(n.Type === 'Warning' || n.Type === 'Conflict') color = '#FF3B30';
+            if(n.Type === 'Assignment') color = '#34C759';
+
+            listHtml += `
+                <div style="background:#F2F2F7; padding:12px; border-radius:10px; margin-bottom:10px; font-size:13px; color:#1D1D1F; border-left: 4px solid ${color};">
+                    <b style="color:${color}; font-size:11px; text-transform:uppercase;">${n.Type}</b><br>
+                    <div style="margin-top:4px;">${n.Message}</div>
+                    <div style="font-size:10px; color:#8E8E93; margin-top:6px;"><i class="far fa-clock"></i> ${n.Created_At}</div>
+                </div>`;
+        });
+        listHtml += '</div>';
+
+        Swal.fire({
+            title: 'Recent Alerts',
+            html: listHtml,
+            confirmButtonText: 'Mark All as Read',
+            showCancelButton: true,
+            cancelButtonText: 'Close',
+            customClass: { confirmButton: 'mac-btn-save', popup: 'mac-popup-radius' }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Send AJAX request to mark notifications as read in the DB
+                fetch('check_notifications.php?action=mark_read').then(() => {
+                    document.getElementById('notif-badge').style.display = 'none';
+                    currentNotifs = []; // Clear the list
+                });
+            }
+        });
+    }
+    // --- END NOTIFICATION LOGIC ---
+
+
+    // --- FULLCALENDAR INIT ---
+    let calendarInstance; // Make it global so the notification polling can refresh it
+    document.addEventListener('DOMContentLoaded', function() {
+        var calendarEl = document.getElementById('calendar');
+        calendarInstance = new FullCalendar.Calendar(calendarEl, {
+            initialView: 'dayGridMonth',
+            headerToolbar: {
+                left: 'prev,next today',
+                center: 'title',
+                right: 'dayGridMonth,timeGridWeek'
+            },
+            height: 400,
+            events: 'fetch_tasks.php', // This file queries the new Project_Tasks/Production_Stage tables
+            eventColor: '#007AFF'
+        });
+        calendarInstance.render();
+    });
 
     function openMacModal() {
         Swal.fire({
