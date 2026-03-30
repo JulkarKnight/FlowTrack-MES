@@ -1,5 +1,13 @@
 # FlowTrack - Intelligent Manufacturing Execution System (MES) 
 
+
+<img width="1920" height="1080" alt="Screenshot (179)" src="https://github.com/user-attachments/assets/2b5c432f-c355-49e9-9191-90ea32187093" />
+<img width="1920" height="1080" alt="Screenshot (178)" src="https://github.com/user-attachments/assets/30e8276c-9359-41da-954c-1e72b2ba421b" />
+<img width="1919" height="1079" alt="Screenshot 2026-03-22 143110" src="https://github.com/user-attachments/assets/a3393ceb-dbc0-4587-ad8d-ac83c6654215" />
+<img width="1920" height="1080" alt="Screenshot (172)" src="https://github.com/user-attachments/assets/f763cdf7-03b5-4040-8883-cfe938843eca" />
+<img width="1920" height="1080" alt="Screenshot (176)" src="https://github.com/user-attachments/assets/099b1384-e9f6-4995-9555-6d6e8e531f3a" />
+<img width="1920" height="1080" alt="Screenshot (173)" src="https://github.com/user-attachments/assets/b36e0d84-8bf5-43af-a858-cd261c61025e" />
+
 FlowTrack is a dual-interface Apparel MES designed to streamline factory operations. It bridges the gap between high-level production planning and individual worker execution by transitioning shop floor management from reactive tracking to **predictive manufacturing intelligence**.
 
  Smart AI & Algorithmic Features (Beta)
